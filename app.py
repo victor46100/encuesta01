@@ -31,6 +31,11 @@ CAMPOS = [
     "idioma"
 ]
 
+# ✅ NUEVO: ruta raíz para que Render y el navegador no vean 404
+@app.route("/")
+def home():
+    return redirect("/diagnostico")
+
 @app.route("/diagnostico")
 def diagnostico():
     return render_template("diagnostico.html")
@@ -86,4 +91,6 @@ def gracias():
 
 if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
-    app.run(debug=True)
+    # ✅ recomendado (local / Render): host 0.0.0.0 y PORT si existe
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
