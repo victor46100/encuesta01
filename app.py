@@ -1,28 +1,22 @@
-import os
+from flask import Flask, request, render_template, redirect
 from datetime import datetime
-
+import csv
 import pandas as pd
-from flask import Flask, render_template, request, redirect, abort, send_file
+import os
 
 app = Flask(__name__)
 
-# =========================
-# Config
-# =========================
-DATA_DIR = "data"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+
 CSV_PATH = os.path.join(DATA_DIR, "diagnostico_procesos.csv")
 XLSX_PATH = os.path.join(DATA_DIR, "diagnostico_procesos.xlsx")
 
-# Token de descarga (NO lo hardcodees en producción si puedes evitarlo)
-# En Render: Settings/Environment -> agrega ADMIN_TOKEN
-ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "hd_2026_iso_descarga_segura")
-
 CAMPOS = [
-    "timestamp",
-    "problema",
-    "objetivo",
-    "area",
-    "urgencia",
+    "fecha_envio",
+    "ambito",
+    "descripcion_problema",
+    "impactos",
     "antiguedad_problema",
     "horizonte",
     "rol_contacto",
@@ -34,75 +28,74 @@ CAMPOS = [
     "cargo",
     "datos_adicionales",
     "pais",
-    "idioma",
+    "idioma"
 ]
 
-# =========================
-# Rutas UI
-# =========================
+# Ruta raíz para que Render y el navegador no vean 404
 @app.route("/")
 def home():
     return redirect("/diagnostico")
 
-@app.route("/diagnostico", methods=["GET", "POST"])
+@app.route("/diagnostico", methods=["GET"])
 def diagnostico():
-    if request.method == "GET":
-        return render_template("diagnostico.html")
+    return render_template("diagnostico.html")
 
-    # POST: guardar respuesta
+# ✅ CORRECCIÓN: aceptar GET y POST para evitar 404 si se abre /submit a mano
+@app.route("/submit", methods=["GET", "POST"])
+def submit():
+    # Si alguien entra por URL a /submit (GET), lo mandamos al formulario
+    if request.method == "GET":
+        return redirect("/diagnostico")
+
     os.makedirs(DATA_DIR, exist_ok=True)
 
-    fila = {c: "" for c in CAMPOS}
-    fila["timestamp"] = datetime.utcnow().isoformat(timespec="seconds")
+    data = request.form
 
-    # Tomar del form (si un campo no existe en el HTML, queda vacío)
-    for c in CAMPOS:
-        if c == "timestamp":
-            continue
-        fila[c] = (request.form.get(c) or "").strip()
+    fila = [
+        datetime.now().isoformat(),
+        data.get("ambito", ""),
+        data.get("descripcion", ""),
+        ", ".join(data.getlist("impactos")),
+        data.get("antiguedad", ""),
+        data.get("horizonte", ""),
+        data.get("rol", ""),
+        data.get("participantes", ""),
+        data.get("recomendacion", ""),
+        data.get("nombre", ""),
+        data.get("correo", ""),
+        data.get("empresa", ""),
+        data.get("cargo", ""),
+        data.get("extra", ""),
+        data.get("pais", ""),
+        data.get("idioma", "")
+    ]
 
-    df_nuevo = pd.DataFrame([fila])
+    # === CSV ===
+    existe_csv = os.path.exists(CSV_PATH)
+    with open(CSV_PATH, "a", newline="", encoding="utf-8-sig") as f:
+        writer = csv.writer(f)
+        if not existe_csv:
+            writer.writerow(CAMPOS)
+        writer.writerow(fila)
 
-    # Guardar/append CSV
-    if os.path.exists(CSV_PATH):
-        df_existente = pd.read_csv(CSV_PATH, dtype=str).fillna("")
+    # === EXCEL ===
+    df_nuevo = pd.DataFrame([fila], columns=CAMPOS)
+    if os.path.exists(XLSX_PATH):
+        df_existente = pd.read_excel(XLSX_PATH)
         df_final = pd.concat([df_existente, df_nuevo], ignore_index=True)
     else:
         df_final = df_nuevo
 
-    df_final.to_csv(CSV_PATH, index=False, encoding="utf-8")
     df_final.to_excel(XLSX_PATH, index=False)
 
     return redirect("/gracias")
 
-@app.route("/gracias")
+@app.route("/gracias", methods=["GET"])
 def gracias():
     return render_template("gracias.html")
 
-
-# =========================
-# Descargas protegidas
-# =========================
-def _check_admin_token():
-    token = request.args.get("token", "")
-    if token != ADMIN_TOKEN:
-        abort(403)
-
-@app.route("/admin/download/csv")
-def download_csv():
-    _check_admin_token()
-    if not os.path.exists(CSV_PATH):
-        abort(404)
-    return send_file(CSV_PATH, as_attachment=True, download_name="diagnostico_procesos.csv")
-
-@app.route("/admin/download/excel")
-def download_excel():
-    _check_admin_token()
-    if not os.path.exists(XLSX_PATH):
-        abort(404)
-    return send_file(XLSX_PATH, as_attachment=True, download_name="diagnostico_procesos.xlsx")
-
-
 if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
-    app.run(debug=True)
+    # Recomendado (local / Render): host 0.0.0.0 y PORT si existe
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
