@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Encuesta – Diagnóstico preliminar</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+    max-width: 900px;
+}
+
+h1 { margin-bottom: 10px; }
+h3 { margin-top: 30px; }
+p  { color: #444; }
+
+label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+select,
+input[type="text"],
+input[type="email"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    margin-bottom: 18px;
+    font-size: 16px;
+}
+
+textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+button {
+    padding: 14px 28px;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+hr {
+    margin: 40px 0;
+}
+</style>
+
+</head>
+<body>
+
+<h1>Encuesta – Diagnóstico preliminar</h1>
+<p>Diagnóstico inicial, filtrado de leads y decisión de si procede una llamada.</p>
+
+<form method="post" action="/submit">
+
+<h3>1. ¿En qué ámbito se manifiesta su problema organizacional?</h3>
+<select name="ambito" required>
+  <option value="">Seleccione</option>
+  <option>Procesos</option>
+  <option>Proyectos</option>
+  <option>Descontrol en administración</option>
+  <option>Productividad del equipo</option>
+  <option>Control / seguimiento</option>
+  <option>Auditoría / cumplimiento</option>
+  <option>Otro</option>
+</select>
+
+<h3>2. Describa brevemente el problema o situación que desea resolver</h3>
+<textarea name="descripcion" required
+placeholder="Máx. 5–7 líneas. Qué está ocurriendo, desde cuándo y qué impacto genera."></textarea>
+
+<h3>3. ¿Qué consecuencias está generando este problema hoy?</h3>
+<label><input type="checkbox" name="impactos" value="Retrasos"> Retrasos</label>
+<label><input type="checkbox" name="impactos" value="Reprocesos y retrabajos"> Reprocesos y retrabajos</label>
+<label><input type="checkbox" name="impactos" value="Sobrecostos"> Sobrecostos</label>
+<label><input type="checkbox" name="impactos" value="Falta de control"> Falta de control</label>
+<label><input type="checkbox" name="impactos" value="Riesgos u observaciones en auditorías"> Riesgos / observaciones en auditorías</label>
+<label><input type="checkbox" name="impactos" value="No conformidades en auditorías"> No conformidades en auditorías</label>
+<label><input type="checkbox" name="impactos" value="Conflictos entre áreas"> Conflictos entre áreas</label>
+
+<h3>4. ¿Desde cuándo existe el problema?</h3>
+<select name="antiguedad" required>
+  <option>Menos de 3 meses</option>
+  <option>3 a 6 meses</option>
+  <option>Más de 6 meses</option>
+  <option>Más de un año</option>
+</select>
+
+<h3>5. ¿En qué horizonte le interesa abordarlo?</h3>
+<select name="horizonte" required>
+  <option>De inmediato</option>
+  <option>Corto plazo (1–2 meses)</option>
+  <option>Mediano plazo</option>
+  <option>Solo exploración</option>
+</select>
+
+<h3>6. Respecto a este problema, usted:</h3>
+<select name="rol" required>
+  <option>Toma decisiones</option>
+  <option>Influye en decisiones</option>
+  <option>Es responsable técnico</option>
+  <option>Solo está explorando</option>
+</select>
+
+<h3>7. ¿Cuántas personas deberían participar en la consultoría?</h3>
+<select name="participantes" required>
+  <option>1 persona</option>
+  <option>2 personas</option>
+  <option>3 personas</option>
+  <option>Más de 3 personas</option>
+</select>
+
+<h3>8. ¿Desea recibir una recomendación preliminar?</h3>
+<select name="recomendacion" required>
+  <option>Sí</option>
+  <option>No</option>
+</select>
+
+<hr>
+
+<h3>Datos de contacto</h3>
+
+<input type="text" name="nombre" placeholder="Nombre y apellido" required>
+<input type="email" name="correo" placeholder="Correo institucional" required>
+<input type="text" name="empresa" placeholder="Empresa / organización" required>
+<input type="text" name="cargo" placeholder="Cargo" required>
+
+<textarea name="extra" placeholder="Otros datos (opcional)"></textarea>
+
+<h3>14. País</h3>
+<select name="pais" required>
+  <option>Perú</option>
+  <option>Chile</option>
+  <option>Ecuador</option>
+  <option>Colombia</option>
+  <option>México</option>
+  <option>Argentina</option>
+  <option>Otro</option>
+</select>
+
+<h3>15. Idioma preferido</h3>
+<select name="idioma" required>
+  <option>Español</option>
+  <option>Inglés</option>
+  <option>Otro</option>
+</select>
+
+<br><br>
+<button type="submit">Enviar encuesta</button>
+
+</form>
+
+</body>
+</html>
